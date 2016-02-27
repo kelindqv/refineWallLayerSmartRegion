@@ -280,16 +280,24 @@ int main(int argc, char *argv[])
 
         const labelList& meshPoints = pp.meshPoints();
 
-        forAll(meshPoints, pointI)
-        {
-            label meshPointI = meshPoints[pointI];
+//        forAll(meshPoints, pointI)
+//        {
+//            label meshPointI = meshPoints[pointI];
 
-            const labelList& pCells = mesh.pointCells()[meshPointI];
+//            const labelList& pCells = mesh.pointCells()[meshPointI];
 
-            forAll(pCells, pCellI)
-            {
-                cutCells.insert(pCells[pCellI]);
-            }
+//            forAll(pCells, pCellI)
+//            {
+//                cutCells.insert(pCells[pCellI]);
+//            }
+//        }   
+     
+        // Only select cells actually connected to patch
+        forAll(pp, faceI)
+        {   
+            label faceCellI = pp.faceCells()[faceI];
+            cutCells.insert(faceCellI);
+//            yPlus[faceCellI]=yPlus.boundaryField()[patchID][faceI];
         }
 
         Info<< "Selected " << cutCells.size()
@@ -319,6 +327,7 @@ int main(int argc, char *argv[])
                 << setName << nl << endl;
         }
 
+        
         // Mark all meshpoints on patch
 
         boolList vertOnPatch(mesh.nPoints(), false);
@@ -329,6 +338,8 @@ int main(int argc, char *argv[])
 
             vertOnPatch[meshPointI] = true;
         }
+        
+
 
 
         // Mark cut edges.
