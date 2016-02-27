@@ -95,6 +95,12 @@ int main(int argc, char *argv[])
         "adjacent",
         "Use stretchRatio as ratio between cell sizes"
     );
+    
+    argList::addBoolOption
+    (
+        "polyhedra",
+        "Create polyhedra (hanging nodes) at patch edges, rather than cuts"
+    );
 
 
 #   include "setRootCase.H"
@@ -279,26 +285,34 @@ int main(int argc, char *argv[])
         }
 
         const labelList& meshPoints = pp.meshPoints();
-
-//        forAll(meshPoints, pointI)
-//        {
-//            label meshPointI = meshPoints[pointI];
-
-//            const labelList& pCells = mesh.pointCells()[meshPointI];
-
-//            forAll(pCells, pCellI)
-//            {
-//                cutCells.insert(pCells[pCellI]);
-//            }
-//        }   
-     
-        // Only select cells actually connected to patch
-        forAll(pp, faceI)
-        {   
-            label faceCellI = pp.faceCells()[faceI];
-            cutCells.insert(faceCellI);
-//            yPlus[faceCellI]=yPlus.boundaryField()[patchID][faceI];
+        
+        if (args.optionFound("polyhedra"))
+        {
+            // Only select cells actually connected to patch
+            forAll(pp, faceI)
+            {   
+                label faceCellI = pp.faceCells()[faceI];
+                cutCells.insert(faceCellI);
+            }
+            
         }
+        else
+        {
+            // Original behavior - cut everything nearby
+            forAll(meshPoints, pointI)
+            {
+                label meshPointI = meshPoints[pointI];
+
+                const labelList& pCells = mesh.pointCells()[meshPointI];
+
+                forAll(pCells, pCellI)
+                {
+                    cutCells.insert(pCells[pCellI]);
+                }
+            }
+        }
+     
+
 
         Info<< "Selected " << cutCells.size()
             << " cells connected to patch " << pp.name() << endl << endl;
